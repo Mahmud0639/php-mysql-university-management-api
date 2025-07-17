@@ -43,7 +43,7 @@ function getUserData(){
     // }
 
     $currentPage = (isset($_GET['currentPage']) && is_numeric($_GET['currentPage']) && $_GET['currentPage']>0) ? (int)$_GET['currentPage']:1;
-    $limit = (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit']>0) ? (int)$_GET['limit']:5;
+    $limit = (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit']>0) ? (int)$_GET['limit']:50;
  
 
     
@@ -402,9 +402,9 @@ function deleteStudent(){
     try {
         $isDeleted = mysqli_query($conn,$stdQuery);
         if ($isDeleted) {
-            echo '{"result":"Data deleted successfully!"}';
+            echo '{"Result":"Data deleted successfully!"}';
         }else{
-            echo '{"result":"Failed to delete data."}';
+            echo '{"Result":"Failed to delete data."}';
         }
     } catch (\Throwable $th) {
         echo "Error ".$th;

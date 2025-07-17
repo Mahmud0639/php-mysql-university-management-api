@@ -10,8 +10,10 @@ switch ($method) {
         break;
     case 'POST':
         uploadImage();
-        break;    
-    
+        break;
+    case 'PUT':
+        updateProfile();
+        break;
     default:
         echo '{"Result":"Unknown Request."}';
         break;
@@ -33,12 +35,21 @@ function getStudentsProfile(){
         }
 
     } catch (\Throwable $th) {
-        echo "Error ".$th;
+        echo json_encode([
+    "Result" => "Error",
+    "Message" => $th->getMessage()
+]);
+exit;
+
     }
 }
 
 function uploadImage(){
     $uploadDirectory = "./../uploads/";
+
+//below two lines are changed for updating profile info
+$profile_id = $_POST['profile_id'];
+$isUpdate = isset($profile_id) && !empty($profile_id);
 
 $file_title = $_POST['title'];
 $file_desc = $_POST['description'];
@@ -129,19 +140,33 @@ if (move_uploaded_file($temporaryFilePath,$finalDestinationPath)) {
 
     include "../db.php";
 
-    $profileInsertQuery = "INSERT INTO students_profile(project_title, project_desc, photoUrl) VALUES ('$file_title','$file_desc','$finalDestinationPathWithoutDot')";
+    //here logic changed to insert or update table
+    if ($isUpdate) {
+         $profileQuery = "UPDATE students_profile SET project_title='$file_title', project_desc='$file_desc', photoUrl='$finalDestinationPathWithoutDot' WHERE id='$profile_id'";
+    }else {
+        $profileQuery = "INSERT INTO students_profile(project_title, project_desc, photoUrl) VALUES ('$file_title','$file_desc','$finalDestinationPathWithoutDot')";
+    }
+    
 
     try {
-        if (mysqli_query($conn,$profileInsertQuery)) {
-             echo '{"Result":"Data saved to database."}'; 
+        if (mysqli_query($conn,$profileQuery)) {
+             //echo '{"Result":"Data saved to database."}';
+             echo json_encode(["Result" => "Data saved to database."]);
+ 
         }else{
-             echo '{"Result":"Failed to save data."}';
+            echo json_encode(["Result" => "Failed to save data."]);
+            // echo '{"Result":"Failed to save data."}';
         }
     } catch (\Throwable $th) {
-       echo "Error ".$th;
+      echo json_encode([
+    "Result" => "Error",
+    "Message" => $th->getMessage()
+]);
+exit;
+
     }
 
-    echo '{"Result":"File uploaded successfully!","Title":"'.$file_title.'","Description":"'.$file_desc.'","photoUrl":"'.$finalDestinationPathWithoutDot.'"}';
+   // echo '{"Result":"File uploaded successfully!","Title":"'.$file_title.'","Description":"'.$file_desc.'","photoUrl":"'.$finalDestinationPathWithoutDot.'"}';
 }else {
     echo '{"Result":"Failed to upload file."}';
 }
@@ -150,11 +175,38 @@ if (move_uploaded_file($temporaryFilePath,$finalDestinationPath)) {
 
 
 }else {
-    echo "Directory is not writable.";
-    die();
+    // echo "Directory is not writable.";
+    // die();
+
+    echo json_encode(["Result" => "Directory is not writable."]);
+    exit;
+
+
 }
 }
 
+function updateProfile(){
+    $data = json_decode(file_get_contents("php://input"),true);
+    $profileId = $data['id'];
+    $project_title = $data['project_title'];
+    $project_desc = $data['project_desc'];
+    $photoUrl = $data['photoUrl'];
+   
+   $updateQuery = "UPDATE students_profile SET project_title = CASE WHEN '$project_title' != '' THEN '$project_title' ELSE project_title END, project_desc = CASE WHEN '$project_desc' != '' THEN '$project_desc' ELSE project_desc END,photoUrl = CASE WHEN '$photoUrl' != '' THEN '$photoUrl' ELSE photoUrl END WHERE id = '$profileId'";
+
+    include("../db.php");
+
+    try {
+       $response =  mysqli_query($conn,$updateQuery);
+       if ($response) {
+         echo '{"Result":"Students updated."}';
+       }else {
+         echo '{"Result":"Failed to update data."}';
+       }
+    } catch (\Throwable $th) {
+        echo "error ".$th;
+    }
+}
 
 
 
