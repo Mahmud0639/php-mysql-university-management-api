@@ -14,6 +14,9 @@ switch ($method) {
     case 'PUT':
         updateProfile();
         break;
+    case 'DELETE':
+        deleteProfile();
+        break;
     default:
         echo '{"Result":"Unknown Request."}';
         break;
@@ -205,6 +208,25 @@ function updateProfile(){
        }
     } catch (\Throwable $th) {
         echo "error ".$th;
+    }
+}
+
+function deleteProfile(){
+    $data = json_decode(file_get_contents("php://input"),true);
+    $profileId = $data['id'];
+    
+    $deleteQuery = "DELETE FROM students_profile WHERE id='$profileId'";
+
+    include("../db.php");
+    try {
+       $executeDelete = mysqli_query($conn,$deleteQuery);
+       if ($executeDelete) {
+            echo '{"Result":"Students deleted."}';
+       }else {
+        echo '{"Result":"Failed to delete student."}';
+       } 
+    } catch (\Throwable $th) {
+        echo "Error ".$th;
     }
 }
 
