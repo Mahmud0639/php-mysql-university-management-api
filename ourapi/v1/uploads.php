@@ -190,7 +190,7 @@ exit;
 
 function updateProfile(){
     $data = json_decode(file_get_contents("php://input"),true);
-    $profileId = $data['id'];
+    $profileId = $data['profile_id'];
     $project_title = $data['project_title'];
     $project_desc = $data['project_desc'];
     $photoUrl = $data['photoUrl'];
@@ -213,7 +213,7 @@ function updateProfile(){
 
 function deleteProfile(){
     $data = json_decode(file_get_contents("php://input"),true);
-    $profileId = $data['id'];
+    $profileId = $data['profile_id'];
     
     $deleteQuery = "DELETE FROM students_profile WHERE id='$profileId'";
 

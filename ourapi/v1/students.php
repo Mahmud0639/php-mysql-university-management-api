@@ -336,6 +336,9 @@ function updateStudentInfo(){
 
     $updateStudent = "UPDATE students SET name= CASE WHEN '$name' != '' THEN '$name' ELSE name END,email= CASE WHEN '$email' != '' THEN '$email' ELSE email END,phone = CASE WHEN '$phone' != '' THEN '$phone' ELSE phone END,credit= CASE WHEN '$total_credit' != '' THEN '$total_credit' ELSE credit END WHERE sId = '$studentId'";
     try {
+
+         $resultMessage = "";
+
         $isStudentUpdated = mysqli_query($conn,$updateStudent);
 
         if (!empty($dept_name)) {
@@ -369,21 +372,28 @@ function updateStudentInfo(){
             }
         }
 
-        if (mysqli_query($conn,$subjectsQuery)) {
-            echo '{"Result":"Success."}';
-        }else{
-            echo '{"Result":"Failed."}';
+        if (!mysqli_query($conn,$subjectsQuery)) {
+           // echo '{"Result":"Success."}';
+           $resultMessage = "Failed";
         }
+        // }else{
+        //     echo '{"Result":"Failed."}';
+        // }
 
 
 
 
 
         if ($isStudentUpdated) {
-            echo '{"Result":"Students updated."}';
+            //echo '{"Result":"Students updated."}';
+            $resultMessage = "Students updated.";
         }else {
            echo '{"Result":"Failed to update data."}'; 
         }
+
+
+         echo json_encode(["Result" => $resultMessage]);
+
     } catch (\Throwable $th) {
         echo "Error ".$th;
     }
